@@ -6,6 +6,8 @@
 #include <set>
 #include <map>
 #include <queue>
+#include <exception>
+#include <assert.h>
 using namespace std;
 long long l= 0, r = 2000000000000000000, k;
 
@@ -160,57 +162,159 @@ public:
         map <int, int> res;
         for(map<int, int>::const_iterator it1 = data.begin(); it1 != data.end(); it1++){
             for(map<int, int>::const_iterator it2 = a.getData().begin(); it2 != a.getData().end(); it2++){
-                res[(*it1).first * (*it2).first] += (*it1).second * (*it2).second;
+                res[(*it1).first + (*it2).first] += (*it1).second * (*it2).second;
             }
+        }
+        return Polynome(res);
+    }
+    
+    Polynome operator / (const Polynome &a) const
+    {
+        map <int, int> res;
+        for (map<int, int>::const_iterator it = data.begin(); it != data.end(); it++)
+        {
+                try
+                {
+                    if ((*a.getData().find((*it).first)) == (*a.getData().end()) || (*a.getData().find((*it).first)).second == 0)
+                    {
+                        throw invalid_argument("Division by zero");
+                    }
+                    
+                    res[(*it).first] = (*it).second / (*a.getData().find((*it).first)).second;
+                }
+                catch (invalid_argument &ia)
+                {
+                    cout << ia.what() << endl;
+                }
         }
         return Polynome(res);
     }
     
     void print(){
         for(map<int, int>::iterator it = this->data.begin(); it != this->data.end(); it++){
-            cout << (*it).first << " " << (*it).second << endl;
+            if ((*it).second != 0)
+            {
+                cout << (*it).first << " " << (*it).second << endl;
+            }
         }
+    }
+    static void print(int a){
+        cout << a << endl;
     }
     
 private:
     map <int, int> data;
     pair <int, int> parseToken(const string &token, const bool signToken){
-        pair <int, int> res;
-        int i = 0;
-        while(token[i] != 'x'){
-            res.second = res.second * 10 + int(token[i] - '0');
-            i++;
-        }
-        i = int(token.length()) - 1;
-        int  p= 1;
-        while(token[i] != '^'){
-            if(token[i] == '-'){
-                res.first = -res.first;
-                break;
-            } else {
-                res.first = res.first + p * int(token[i] - '0');
-                i--;
-                p *= 10;
+        try{
+            pair <int, int> res;
+            int i = 0;
+            while(i < token.length() && token[i] != 'x'){
+                if((token[i] < '0') || (token[i] > '9'))
+                {
+                    throw invalid_argument("Invalid coef");
+                }
+                res.second = res.second * 10 + int(token[i] - '0');
+                i++;
             }
+            if (i == token.length())
+            {
+                throw out_of_range("No x");
+            }
+            if (token[i + 1] != '^')
+            {
+                throw domain_error("X in wrong place");
+            }
+            i = int(token.length()) - 1;
+            int  p= 1;
+            while(token[i] != '^'){
+                if(i == 0)
+                {
+                    throw out_of_range("No Power Sign");
+                }
+                if(token[i] == '-'){
+                    if(token[i - 1] != '^')
+                    {
+                        throw domain_error("Minus in wrong place");
+                    }
+                    res.first = -res.first;
+                } else {
+                    if((token[i] < '0') || (token[i] > '9'))
+                    {
+                        throw invalid_argument("Invalid Power");
+                    }
+                    res.first = res.first + p * int(token[i] - '0');
+                    i--;
+                    p *= 10;
+                }
+            }
+            
+            if (token[i - 1] != 'x')
+            {
+                throw domain_error("Power Sing in wrong place");
+            }
+            
+            if (signToken == 0)
+            {
+                res.second = -res.second;
+            }
+            return res;
+            
         }
-        if(signToken == 0) res.second = -res.second;
-        return res;
+        catch(invalid_argument &ia){
+            cout << ia.what() << endl;
+            return make_pair(0, 0);
+        }
+        catch(out_of_range &oor){
+            cout << oor.what() << endl;
+            return make_pair(0, 0);
+        }
+        catch(domain_error &de){
+            cout << de.what() << endl;
+            return make_pair(0, 0);
+        }
+        catch(...){
+            cout << "Unknown exception\n";
+            return make_pair(0, 0);
+        }
     }
     
 };
 
+vector <int> operator + (vector <int> a, vector <int> b){
+    
+    assert(a.size() == b.size() && "ERROR! Different length");
+    vector <int> res(a.size(), 0);
+    for(int i = 0; i < a.size(); i++){
+        res[i] = a[i] + b[i];
+    }
+    return res;
+}
 
 int main()
 {
+    int *b = new int[100000];
+    if (5 > 3)
+    {
+        int *a = new int[100000];
+        fill(a, a + 10000, 6);
+        b = a;
+        a[7] = 0;
+    }
+    for (int i = 0;i < 100; i++)
+    {
+        cout << b[i];
+    }
     freopen ("input.txt","r",stdin);
     freopen ("output.txt","w",stdout);
+//    int a = 6, b = 5;
     string s1, s2;
     cin >> s1 >> s2;
     //    Polynome a(s);
     //    a.print();
     Polynome x(s1), y(s2);
-    if(x > y)
-        printf ("1");
-    else printf("0");
+    size_t s = sizeof(x);
+    Polynome z = x / y;
+    z.print();
+//    int a = x > y ? 5 : 10;
     return 0;
 }
