@@ -9,6 +9,91 @@
 #include <exception>
 #include <assert.h>
 using namespace std;
+
+class Node
+{
+public:
+    Node()
+    {
+        this->value = 0;
+        this->next = NULL;
+    }
+    Node(int a)
+    {
+        this->value = a;
+        this->next = NULL;
+    }
+    Node(Node &a)
+    {
+        this->value = a.getValue();
+        this->next = a.getNext();
+    }
+    int getValue()
+    {
+        return this->value;
+    }
+    Node* getNext()
+    {
+        return this->next;
+    }
+    void setValue(int a)
+    {
+        this->value = a;
+    }
+    void setNext(Node* a)
+    {
+        this->next = a;
+    }
+    
+private:
+    int value;
+    Node* next;
+};
+
+class List
+{
+public:
+    friend Node;
+    List()
+    {
+        this->head = NULL;
+    }
+    void Erase(int number){
+        Node *nxt = getHead();
+        for(int i = 0; i < number - 1; i++)
+        {
+            nxt = nxt->getNext();
+        }
+        Node *nxt1 = nxt;
+        nxt1 = nxt1->getNext();
+        nxt->getNext() = nxt1->getNext();
+    }
+    void add(int a, int pos = -1){
+        
+    }
+    int getSize(){
+        return size;
+    }
+    void addList(List a, int pos = -1){
+        
+    }
+//    List(List &a)
+//    {
+//        Node *b = a.getHead();
+//        while(b->getNext() != NULL)
+//        {
+//            
+//        }
+//    }
+    Node* getHead()
+    {
+        return this->head;
+    }
+private:
+    Node* head;
+    int size;
+};
+
 long long l= 0, r = 2000000000000000000, k;
 
 
@@ -173,19 +258,19 @@ public:
         map <int, int> res;
         for (map<int, int>::const_iterator it = data.begin(); it != data.end(); it++)
         {
-                try
+            try
+            {
+                if ((*a.getData().find((*it).first)) == (*a.getData().end()) || (*a.getData().find((*it).first)).second == 0)
                 {
-                    if ((*a.getData().find((*it).first)) == (*a.getData().end()) || (*a.getData().find((*it).first)).second == 0)
-                    {
-                        throw invalid_argument("Division by zero");
-                    }
-                    
-                    res[(*it).first] = (*it).second / (*a.getData().find((*it).first)).second;
+                    throw invalid_argument("Division by zero");
                 }
-                catch (invalid_argument &ia)
-                {
-                    cout << ia.what() << endl;
-                }
+                
+                res[(*it).first] = (*it).second / (*a.getData().find((*it).first)).second;
+            }
+            catch (invalid_argument &ia)
+            {
+                cout << ia.what() << endl;
+            }
         }
         return Polynome(res);
     }
@@ -204,6 +289,7 @@ public:
     
 private:
     map <int, int> data;
+    
     pair <int, int> parseToken(const string &token, const bool signToken){
         try{
             pair <int, int> res;
@@ -289,32 +375,9 @@ vector <int> operator + (vector <int> a, vector <int> b){
     }
     return res;
 }
-
 int main()
 {
-    int *b = new int[100000];
-    if (5 > 3)
-    {
-        int *a = new int[100000];
-        fill(a, a + 10000, 6);
-        b = a;
-        a[7] = 0;
-    }
-    for (int i = 0;i < 100; i++)
-    {
-        cout << b[i];
-    }
-    freopen ("input.txt","r",stdin);
-    freopen ("output.txt","w",stdout);
-//    int a = 6, b = 5;
-    string s1, s2;
-    cin >> s1 >> s2;
-    //    Polynome a(s);
-    //    a.print();
-    Polynome x(s1), y(s2);
-    size_t s = sizeof(x);
-    Polynome z = x / y;
-    z.print();
-//    int a = x > y ? 5 : 10;
+    freopen("input.txt", "r", stdin);
+    freopen("output.txt", "w", stdout);
     return 0;
 }
